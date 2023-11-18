@@ -12,6 +12,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+      - name: Install Ubuntu Build Dependencies
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          sudo apt update
+          sudo apt install libssh2-1-dev
+      - name: Install MacOS Build Dependencies
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          brew install libssh2
       - name: Build
         run: |
           mkdir build
