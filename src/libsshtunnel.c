@@ -253,7 +253,7 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
 				     void *client,
 				     ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
 				     ssh_tunnel_signal_error_func_t signal_error_callback) {
-    int rc, i;
+    int rc;
     struct sockaddr_in sin;
     socklen_t sinlen;
     const char *fingerprint;
