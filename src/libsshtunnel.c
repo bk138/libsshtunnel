@@ -237,10 +237,7 @@ int ssh_tunnel_init() {
 void ssh_tunnel_exit() {
     libssh2_exit();
 #ifdef WIN32
-    if(WSACleanup() != 0) {
-	errno = WSAGetLastError();
-	proxy_ssh_err("Could not terminate Windows Sockets\n");
-    }
+    WSACleanup();
 #endif
 }
 
