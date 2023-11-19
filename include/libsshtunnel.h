@@ -42,6 +42,8 @@ typedef enum {
    Signal an error for a particular SSH tunnel. FIXME or client?
    This is mostly for informative purposes as the connection through
    the tunnel will disconnect on tunnel collapse anyway.
+   NB that this might get called on a different thread than the one that
+   opened the tunnel.
 */
 typedef void (*ssh_tunnel_signal_error_func_t)(void *client,
 					       ssh_tunnel_error_t error_code,
