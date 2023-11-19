@@ -21,6 +21,10 @@
 #include <errno.h>
 #ifdef WIN32
 #include <ws2tcpip.h>
+#ifdef _MSC_VER
+// Prevent POSIX deprecation warnings
+#define strdup _strdup
+#endif
 #else
 #include <arpa/inet.h>
 #include <netdb.h>
