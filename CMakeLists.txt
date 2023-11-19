@@ -6,8 +6,8 @@
 #
 cmake_minimum_required(VERSION 3.10)
 project(libsshtunnel C)
+include(CheckIncludeFile)
 
-set(CMAKE_C_STANDARD 11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(CMAKE_GENERATOR MATCHES "Unix Makefiles|Ninja")
@@ -24,6 +24,19 @@ endif(CMAKE_GENERATOR MATCHES "Unix Makefiles|Ninja")
 # Dependencies
 #
 find_package(LibSSH2 REQUIRED)
+check_include_file("threads.h" HAVE_THREADS_H)
+if(HAVE_THREADS_H)
+  message(STATUS "Multithreading using C11 threads")
+  add_definitions(-DHAVE_THREADS_H)
+else()
+  find_package(Threads REQUIRED)
+  if(CMAKE_USE_PTHREADS_INIT)
+    message(STATUS "Multithreading using pthreads")
+  endif()
+  if(CMAKE_USE_WIN32_THREADS_INIT)
+    message(STATUS "Multithreading Win32 threads")
+  endif()
+endif()
 
 #
 # Sources
@@ -31,6 +44,20 @@ find_package(LibSSH2 REQUIRED)
 set(SOURCE_FILES
     src/libsshtunnel.c
 )
+if(CMAKE_USE_PTHREADS_INIT)
+  set(SOURCE_FILES
+    ${SOURCE_FILES}
+    src/c11threads.h
+  )
+endif()
+if(CMAKE_USE_WIN32_THREADS_INIT)
+  set(SOURCE_FILES
+    ${SOURCE_FILES}
+    src/c11threads.h
+    src/c11threads_win32.c
+  )
+endif()
+
 
 set(HEADER_FILES
     include/libsshtunnel.h
@@ -50,7 +77,7 @@ endif(WIN32)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${LIBSSH2_INCLUDE_DIR})
 add_library(sshtunnel ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(sshtunnel PRIVATE ${LIBSSH2_LIBRARY} ${WS_LIBRARY})
+target_link_libraries(sshtunnel PRIVATE ${LIBSSH2_LIBRARY} ${WS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 
 
 #

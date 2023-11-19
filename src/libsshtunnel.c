@@ -18,7 +18,6 @@
 #include <libssh2.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <threads.h>
 #include <errno.h>
 #ifdef WIN32
 #include <ws2tcpip.h>
@@ -28,6 +27,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#endif
+#if HAVE_THREADS_H
+#include <threads.h>
+#else
+#include "c11threads.h"
 #endif
 
 /*
