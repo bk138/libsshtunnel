@@ -1,3 +1,4 @@
+[![CI](https://github.com/bk138/libsshtunnel/actions/workflows/ci.yml/badge.svg)](https://github.com/bk138/libsshtunnel/actions/workflows/ci.yml)
 
 # libsshtunnel
 
