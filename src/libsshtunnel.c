@@ -75,7 +75,7 @@ struct _ssh_tunnel {
 
 static int ssh_conveyor_loop(void *arg) {
     ssh_tunnel_t *data = arg;
-    int rc, i;
+    int rc;
     struct sockaddr_in sin;
     socklen_t sinlen;
     LIBSSH2_CHANNEL *channel = NULL;
@@ -154,19 +154,19 @@ static int ssh_conveyor_loop(void *arg) {
             }
             wr = 0;
             while(wr < len) {
-                i = libssh2_channel_write(channel, buf + wr, len - wr);
-                if(LIBSSH2_ERROR_EAGAIN == i) {
+                ssize_t nwritten = libssh2_channel_write(channel, buf + wr, len - wr);
+                if(LIBSSH2_ERROR_EAGAIN == nwritten) {
                     continue;
                 }
-                if(i < 0) {
+                if(nwritten < 0) {
 		    if(data->signal_error_callback) {
 			char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: libssh2_channel_write: %d\n", i);
+			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: libssh2_channel_write: %ld\n", nwritten);
 			data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
 		    }
                     goto shutdown;
                 }
-                wr += i;
+                wr += nwritten;
             }
         }
         while(1) {
@@ -183,8 +183,8 @@ static int ssh_conveyor_loop(void *arg) {
             }
             wr = 0;
             while(wr < len) {
-                i = send(proxy_sock, buf + wr, len - wr, 0);
-                if(i <= 0) {
+                ssize_t nsent = send(proxy_sock, buf + wr, len - wr, 0);
+                if(nsent <= 0) {
 		    if(data->signal_error_callback) {
 			char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
 			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: write: %s\n", strerror(errno));
@@ -192,7 +192,7 @@ static int ssh_conveyor_loop(void *arg) {
 		    }
 		    goto shutdown;
                 }
-                wr += i;
+                wr += nsent;
             }
             if(libssh2_channel_eof(channel)) {
 		if(data->signal_error_callback) {
