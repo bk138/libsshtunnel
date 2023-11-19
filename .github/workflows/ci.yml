@@ -9,6 +9,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
+          - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -21,9 +22,17 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
           brew install libssh2
+      - name: Install Windows Build Dependencies
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: johnwason/vcpkg-action@v4
+        id: vcpkg
+        with:
+          pkgs: libssh2
+          triplet: x64-windows
+          token: ${{ github.token }}
       - name: Build
         run: |
           mkdir build
           cd build
-          cmake ..
+          cmake ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} ..
           cmake --build .
