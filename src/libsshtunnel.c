@@ -81,7 +81,7 @@ static int ssh_conveyor_loop(void *arg) {
     struct timeval tv;
     ssize_t len, wr;
     char buf[16384];
-    int proxy_sock = LIBSSHTUNNEL_INVALID_SOCKET;
+    libssh2_socket_t proxy_sock = LIBSSHTUNNEL_INVALID_SOCKET;
 
     proxy_sock = accept(data->local_listensock, (struct sockaddr *)&sin, &sinlen);
     if(proxy_sock == LIBSSHTUNNEL_INVALID_SOCKET) {
