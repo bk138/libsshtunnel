@@ -24,6 +24,8 @@
 #ifdef _MSC_VER
 // Prevent POSIX deprecation warnings
 #define strdup _strdup
+// Use strerror_s for strerror_r
+#define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
 #endif
 #else
 #include <arpa/inet.h>
@@ -90,8 +92,10 @@ static int ssh_conveyor_loop(void *arg) {
     proxy_sock = accept(data->local_listensock, (struct sockaddr *)&sin, &sinlen);
     if(proxy_sock == LIBSSHTUNNEL_INVALID_SOCKET) {
 	if(data->signal_error_callback) {
+	    char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+	    strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: accept: %s\n", strerror(errno));
+	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: accept: %s\n", err_str);
 	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
 	}
         goto shutdown;
@@ -128,8 +132,10 @@ static int ssh_conveyor_loop(void *arg) {
         rc = select(proxy_sock + 1, &fds, NULL, NULL, &tv);
         if(-1 == rc) {
 	    if(data->signal_error_callback) {
+		char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+		strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 		char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-		snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: select: %s\n", strerror(errno));
+		snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: select: %s\n", err_str);
 		data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
 	    }
             goto shutdown;
@@ -138,8 +144,10 @@ static int ssh_conveyor_loop(void *arg) {
             len = recv(proxy_sock, buf, sizeof(buf), 0);
             if(len < 0) {
 		if(data->signal_error_callback) {
+		    char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+		    strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 		    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-		    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: read: %s\n", strerror(errno));
+		    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: read: %s\n", err_str);
 		    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
 		}
                 goto shutdown;
@@ -186,8 +194,10 @@ static int ssh_conveyor_loop(void *arg) {
                 ssize_t nsent = send(proxy_sock, buf + wr, len - wr, 0);
                 if(nsent <= 0) {
 		    if(data->signal_error_callback) {
+			char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+			strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 			char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: write: %s\n", strerror(errno));
+			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: write: %s\n", err_str);
 			data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
 		    }
 		    goto shutdown;
@@ -282,8 +292,10 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     data->ssh_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(data->ssh_sock == LIBSSHTUNNEL_INVALID_SOCKET) {
 	if(data->signal_error_callback) {
+	    char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+	    strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: socket: %s\n", strerror(errno));
+	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: socket: %s\n", err_str);
 	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
 	}
         goto error;
@@ -392,8 +404,10 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     data->local_listensock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(data->local_listensock == LIBSSHTUNNEL_INVALID_SOCKET) {
 	if(data->signal_error_callback) {
+	    char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+	    strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: socket: %s\n", strerror(errno));
+	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: socket: %s\n", err_str);
 	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
 	}
 	goto error;
@@ -403,8 +417,10 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     sin.sin_addr.s_addr = inet_addr("127.0.0.1");
     if(INADDR_NONE == sin.sin_addr.s_addr) {
 	if(data->signal_error_callback) {
+	    char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+	    strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: inet_addr: %s\n", strerror(errno));
+	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: inet_addr: %s\n", err_str);
 	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
 	}
         goto error;
@@ -412,16 +428,20 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     sinlen = sizeof(sin);
     if(-1 == bind(data->local_listensock, (struct sockaddr *)&sin, sinlen)) {
 	if(data->signal_error_callback) {
+	    char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+	    strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: bind: %s\n", strerror(errno));
+	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: bind: %s\n", err_str);
 	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
 	}
         goto error;
     }
     if(-1 == listen(data->local_listensock, 1)) {
 	if(data->signal_error_callback) {
+	    char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+	    strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: listen: %s\n", strerror(errno));
+	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: listen: %s\n", err_str);
 	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
 	}
         goto error;
@@ -430,8 +450,10 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     /* get info back from OS */
     if (getsockname(data->local_listensock, (struct sockaddr *)&sin, &sinlen ) == -1){
 	if(data->signal_error_callback) {
+	    char err_str[LIBSSHTUNNEL_ERROR_MSG_LEN];
+	    strerror_r(errno, err_str, LIBSSHTUNNEL_ERROR_MSG_LEN);
 	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: getsockname: %s\n", strerror(errno));
+	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: getsockname: %s\n", err_str);
 	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
 	}
 	goto error;
