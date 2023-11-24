@@ -13,6 +13,9 @@
 #define LIBSSHTUNNEL_VERSION_MINOR 1
 #define LIBSSHTUNNEL_VERSION_PATCH 0
 
+/**
+   Handle to an SSH tunnel.
+ */
 typedef struct _ssh_tunnel ssh_tunnel_t;
 
 typedef enum {
@@ -43,11 +46,14 @@ typedef enum {
 
 
 /**
-   Signal an error for a particular SSH tunnel. FIXME or client?
+   Signal an error for a particular SSH tunnel client.
    This is mostly for informative purposes as the connection through
    the tunnel will disconnect on tunnel collapse anyway.
    NB that this might get called on a different thread than the one that
    opened the tunnel.
+   @param client Application pointer given in tunnel open.
+   @param error_code One of \ref ssh_tunnel_error_t
+   @param error_message Human-readable error message
 */
 typedef void (*ssh_tunnel_signal_error_func_t)(void *client,
 					       ssh_tunnel_error_t error_code,
@@ -58,6 +64,10 @@ typedef void (*ssh_tunnel_signal_error_func_t)(void *client,
    based on the current host and its fingerprint.
    Business logic is up to the implementer in the using app, i.e.
    compare keys, ask user etc...
+   @param client Application pointer given in tunnel open.
+   @param fingerprint SHA256 fingerprint of \p host
+   @param fingerprint_len Length in bytes of \p fingerprint
+   @param host The SSH server whose fingerprint is presented.
    @return -1 if tunnel setup should be aborted
             0 if tunnel setup should continue
  */
@@ -84,7 +94,7 @@ int ssh_tunnel_init();
    @param ssh_password The SSH user password to authenticate with.
    @param remote_host The remote host to connect to from the SSH server.
    @param remote_port The port of the remote host to connect to from the SSH server.
-   @param client Pointer that's given to the SSH fingerprint check and log callbacks. FIXME
+   @param client Application pointer that's given to the SSH fingerprint check and log callbacks.
    @param ssh_fingerprint_check_callback SSH fingerprint check callback.
    @param error_callback Callback to log errors. Can be NULL.
    @return An open SSH tunnel to \p remote_host via \p ssh_host, listening on localhost.
@@ -110,7 +120,7 @@ ssh_tunnel_t* ssh_tunnel_open_with_password(const char *ssh_host,
    @param ssh_priv_key_password The SSH private key password to authenticate with.
    @param remote_host The remote host to connect to from the SSH server.
    @param remote_port The port of the remote host to connect to from the SSH server.
-   @param client Pointer that's given to the SSH fingerprint check and log callbacks. FIXME
+   @param client Application pointer that's given to the SSH fingerprint check and log callbacks.
    @param ssh_fingerprint_check_callback SSH fingerprint check callback.
    @param error_callback Callback to log errors. Can be NULL.
    @return An open SSH tunnel to \p remote_host via \p ssh_host, listening on localhost.
