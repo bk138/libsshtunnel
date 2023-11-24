@@ -11,6 +11,10 @@
 
 #include <stddef.h>
 
+#define LIBSSHTUNNEL_VERSION_MAJOR 0
+#define LIBSSHTUNNEL_VERSION_MINOR 1
+#define LIBSSHTUNNEL_VERSION_PATCH 0
+
 typedef struct _ssh_tunnel ssh_tunnel_t;
 
 typedef enum {
