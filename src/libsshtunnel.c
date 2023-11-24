@@ -51,12 +51,12 @@
 #define _libsshtunnel_socket_close close
 #endif
 /// A socket close wrapper that sets the socket to invalid after close.
-#define libsshtunnel_socket_close(s)		\
-    {						\
-	if (s != LIBSSHTUNNEL_INVALID_SOCKET) {	\
-	    _libsshtunnel_socket_close(s);	\
-	    s = LIBSSHTUNNEL_INVALID_SOCKET;	\
-	}					\
+#define libsshtunnel_socket_close(s)            \
+    {                                           \
+        if (s != LIBSSHTUNNEL_INVALID_SOCKET) { \
+            _libsshtunnel_socket_close(s);      \
+            s = LIBSSHTUNNEL_INVALID_SOCKET;    \
+        }                                       \
     }
 
 #define LIBSSHTUNNEL_ERROR_MSG_LEN 128
@@ -92,13 +92,13 @@ static int ssh_conveyor_loop(void *arg) {
 
     proxy_sock = accept(data->local_listensock, (struct sockaddr *)&sin, &sinlen);
     if(proxy_sock == LIBSSHTUNNEL_INVALID_SOCKET) {
-	if(data->signal_error_callback) {
-	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: accept: %s\n", err_str);
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
-	}
+        if(data->signal_error_callback) {
+            char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+            strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: accept: %s\n", err_str);
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
+        }
         goto shutdown;
     }
 
@@ -112,13 +112,13 @@ static int ssh_conveyor_loop(void *arg) {
     channel = libssh2_channel_direct_tcpip_ex(data->session, data->remote_desthost,
         data->remote_destport, shost, sport);
     if(!channel) {
-	if(data->signal_error_callback) {
-	    data->signal_error_callback(data->client,
-					LIBSSHTUNNEL_ERROR_DIRECT_TCP_IP,
-					"ssh_conveyor_loop: Could not open the direct-tcpip channel!\n"
-					"(Note that this can be a problem at the server!"
-					" Please review the server logs.)\n");
-	}
+        if(data->signal_error_callback) {
+            data->signal_error_callback(data->client,
+                                        LIBSSHTUNNEL_ERROR_DIRECT_TCP_IP,
+                                        "ssh_conveyor_loop: Could not open the direct-tcpip channel!\n"
+                                        "(Note that this can be a problem at the server!"
+                                        " Please review the server logs.)\n");
+        }
         goto shutdown;
     }
 
@@ -132,33 +132,33 @@ static int ssh_conveyor_loop(void *arg) {
         tv.tv_usec = 100000;
         rc = select((int)(proxy_sock + 1), &fds, NULL, NULL, &tv);
         if(-1 == rc) {
-	    if(data->signal_error_callback) {
-		char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-		strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-		char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-		snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: select: %s\n", err_str);
-		data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
-	    }
+            if(data->signal_error_callback) {
+                char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+                strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+                char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+                snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: select: %s\n", err_str);
+                data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
+            }
             goto shutdown;
         }
         if(rc && FD_ISSET(proxy_sock, &fds)) {
             len = recv(proxy_sock, buf, sizeof(buf), 0);
             if(len < 0) {
-		if(data->signal_error_callback) {
-		    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-		    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-		    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-		    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: read: %s\n", err_str);
-		    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
-		}
+                if(data->signal_error_callback) {
+                    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+                    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+                    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+                    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: read: %s\n", err_str);
+                    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
+                }
                 goto shutdown;
             }
             else if(0 == len) {
-		if(data->signal_error_callback) {
-		    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-		    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: the client at %s:%d disconnected!\n", shost, sport);
-		    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
-		}
+                if(data->signal_error_callback) {
+                    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+                    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: the client at %s:%d disconnected!\n", shost, sport);
+                    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
+                }
                 goto shutdown;
             }
             wr = 0;
@@ -168,11 +168,11 @@ static int ssh_conveyor_loop(void *arg) {
                     continue;
                 }
                 if(nwritten < 0) {
-		    if(data->signal_error_callback) {
-			char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: libssh2_channel_write: %ld\n", nwritten);
-			data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
-		    }
+                    if(data->signal_error_callback) {
+                        char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+                        snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: libssh2_channel_write: %ld\n", nwritten);
+                        data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
+                    }
                     goto shutdown;
                 }
                 wr += nwritten;
@@ -183,35 +183,35 @@ static int ssh_conveyor_loop(void *arg) {
             if(LIBSSH2_ERROR_EAGAIN == len || data->close_session)
                 break;
             else if(len < 0) {
-		if(data->signal_error_callback) {
-			char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: libssh2_channel_read: %d\n", (int)len);
-			data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
-		}
+                if(data->signal_error_callback) {
+                        char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+                        snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: libssh2_channel_read: %d\n", (int)len);
+                        data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
+                }
                 goto shutdown;
             }
             wr = 0;
             while(wr < len) {
                 ssize_t nsent = send(proxy_sock, buf + wr, len - wr, 0);
                 if(nsent <= 0) {
-		    if(data->signal_error_callback) {
-			char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-			strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-			char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: write: %s\n", err_str);
-			data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
-		    }
-		    goto shutdown;
+                    if(data->signal_error_callback) {
+                        char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+                        strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+                        char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+                        snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: write: %s\n", err_str);
+                        data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
+                    }
+                    goto shutdown;
                 }
                 wr += nsent;
             }
             if(libssh2_channel_eof(channel)) {
-		if(data->signal_error_callback) {
-			char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-			snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: the server at %s:%d disconnected!\n",
-				 data->remote_desthost, data->remote_destport);
-			data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
-		}
+                if(data->signal_error_callback) {
+                        char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+                        snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: the server at %s:%d disconnected!\n",
+                                 data->remote_desthost, data->remote_destport);
+                        data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_READ_WRITE, msg);
+                }
                 goto shutdown;
             }
         }
@@ -261,16 +261,16 @@ void ssh_tunnel_exit() {
 
 
 static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
-				     const char *ssh_user,
-				     const char *ssh_password,
-				     const char *ssh_priv_key,
-				     int ssh_priv_key_len,
-				     const char *ssh_priv_key_password,
-				     const char *remote_host,
-				     int remote_port,
-				     void *client,
-				     ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
-				     ssh_tunnel_signal_error_func_t signal_error_callback) {
+                                     const char *ssh_user,
+                                     const char *ssh_password,
+                                     const char *ssh_priv_key,
+                                     int ssh_priv_key_len,
+                                     const char *ssh_priv_key_password,
+                                     const char *remote_host,
+                                     int remote_port,
+                                     void *client,
+                                     ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
+                                     ssh_tunnel_signal_error_func_t signal_error_callback) {
     int rc;
     struct sockaddr_in sin;
     socklen_t sinlen;
@@ -281,18 +281,18 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
 
     /* Sanity checks */
     if(!ssh_host || !ssh_user || !remote_host) /* these must be set */
-	return NULL;
+        return NULL;
 
     data = calloc(1, sizeof(ssh_tunnel_t));
     if(!data) {
-	if(signal_error_callback) {
-	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: could not allocate memory: %s\n", err_str);
-	    signal_error_callback(client, LIBSSHTUNNEL_ERROR_MEM, msg);
-	}
-	return NULL;
+        if(signal_error_callback) {
+            char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+            strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: could not allocate memory: %s\n", err_str);
+            signal_error_callback(client, LIBSSHTUNNEL_ERROR_MEM, msg);
+        }
+        return NULL;
     }
 
     // set the sockets to invalid so we don't close invalid sockets inadvertently
@@ -306,13 +306,13 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     /* Connect to SSH server */
     data->ssh_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(data->ssh_sock == LIBSSHTUNNEL_INVALID_SOCKET) {
-	if(data->signal_error_callback) {
-	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: socket: %s\n", err_str);
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
-	}
+        if(data->signal_error_callback) {
+            char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+            strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: socket: %s\n", err_str);
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
+        }
         goto error;
     }
 
@@ -321,33 +321,33 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     hints.ai_socktype = SOCK_STREAM;
 
     if ((rc = getaddrinfo(ssh_host, NULL, &hints, &res)) == 0) {
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = (((struct sockaddr_in *)res->ai_addr)->sin_addr.s_addr);
-	freeaddrinfo(res);
+        sin.sin_family = AF_INET;
+        sin.sin_addr.s_addr = (((struct sockaddr_in *)res->ai_addr)->sin_addr.s_addr);
+        freeaddrinfo(res);
     } else {
-	if(data->signal_error_callback) {
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: getaddrinfo: %s\n", gai_strerror(rc));
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_NAME_RESOLUTION, msg);
-	}
-	goto error;
+        if(data->signal_error_callback) {
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: getaddrinfo: %s\n", gai_strerror(rc));
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_NAME_RESOLUTION, msg);
+        }
+        goto error;
     }
 
     sin.sin_port = htons(22);
     if(connect(data->ssh_sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) != 0) {
-	if(data->signal_error_callback) {
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SSH_CONNECT, "ssh_tunnel_open: failed to connect to SSH server!\n");
-	}
-	goto error;
+        if(data->signal_error_callback) {
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SSH_CONNECT, "ssh_tunnel_open: failed to connect to SSH server!\n");
+        }
+        goto error;
     }
 
     /* Create a session instance */
     data->session = libssh2_session_init();
     if(!data->session) {
-	if(data->signal_error_callback) {
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SSH_INIT, "ssh_tunnel_open: could not initialize SSH session!\n");
-	}
-	goto error;
+        if(data->signal_error_callback) {
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SSH_INIT, "ssh_tunnel_open: could not initialize SSH session!\n");
+        }
+        goto error;
     }
 
     /* ... start it up. This will trade welcome banners, exchange keys,
@@ -355,13 +355,13 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
      */
     rc = libssh2_session_handshake(data->session, data->ssh_sock);
     if(rc) {
-	if(data->signal_error_callback) {
-	    char *error_msg;
-	    libssh2_session_last_error(data->session, &error_msg, NULL, 0);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: error when starting up SSH session: %d: %s\n", rc, error_msg);
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SSH_HANDSHAKE, msg);
-	}
+        if(data->signal_error_callback) {
+            char *error_msg;
+            libssh2_session_last_error(data->session, &error_msg, NULL, 0);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: error when starting up SSH session: %d: %s\n", rc, error_msg);
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SSH_HANDSHAKE, msg);
+        }
         goto error;
     }
 
@@ -372,11 +372,11 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
      */
     fingerprint = libssh2_hostkey_hash(data->session, LIBSSH2_HOSTKEY_HASH_SHA256);
     if(ssh_fingerprint_check_callback(data->client, fingerprint, 32, ssh_host) == -1) {
-	if(data->signal_error_callback) {
-	    data->signal_error_callback(data->client,
-					LIBSSHTUNNEL_ERROR_SSH_FINGERPRINT_CHECK,
-					"ssh_tunnel_open: fingerprint check indicated tunnel setup stop\n");
-	}
+        if(data->signal_error_callback) {
+            data->signal_error_callback(data->client,
+                                        LIBSSHTUNNEL_ERROR_SSH_FINGERPRINT_CHECK,
+                                        "ssh_tunnel_open: fingerprint check indicated tunnel setup stop\n");
+        }
         goto error;
     }
 
@@ -384,11 +384,11 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     userauthlist = libssh2_userauth_list(data->session, ssh_user, (unsigned int)strlen(ssh_user));
     if(ssh_password && strstr(userauthlist, "password")) {
         if(libssh2_userauth_password(data->session, ssh_user, ssh_password)) {
-	    if(data->signal_error_callback) {
-		data->signal_error_callback(data->client,
-					    LIBSSHTUNNEL_ERROR_SSH_AUTH,
-					    "ssh_tunnel_open: authentication by password failed.\n");
-	    }
+            if(data->signal_error_callback) {
+                data->signal_error_callback(data->client,
+                                            LIBSSHTUNNEL_ERROR_SSH_AUTH,
+                                            "ssh_tunnel_open: authentication by password failed.\n");
+            }
             goto error;
         }
     }
@@ -398,98 +398,98 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
                                                  NULL, 0,
                                                  (const char*)ssh_priv_key, ssh_priv_key_len,
                                                  ssh_priv_key_password)) {
-	    if(data->signal_error_callback) {
-		data->signal_error_callback(data->client,
-					    LIBSSHTUNNEL_ERROR_SSH_AUTH,
-					    "ssh_tunnel_open: authentication by public key failed!\n");
-	    }
+            if(data->signal_error_callback) {
+                data->signal_error_callback(data->client,
+                                            LIBSSHTUNNEL_ERROR_SSH_AUTH,
+                                            "ssh_tunnel_open: authentication by public key failed!\n");
+            }
             goto error;
         }
     }
     else {
-	if(data->signal_error_callback) {
-	    data->signal_error_callback(data->client,
-					LIBSSHTUNNEL_ERROR_SSH_AUTH,
-					"ssh_tunnel_open: no supported authentication methods found!\n");
-	}
+        if(data->signal_error_callback) {
+            data->signal_error_callback(data->client,
+                                        LIBSSHTUNNEL_ERROR_SSH_AUTH,
+                                        "ssh_tunnel_open: no supported authentication methods found!\n");
+        }
         goto error;
     }
 
     /* Create and bind the local listening socket */
     data->local_listensock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(data->local_listensock == LIBSSHTUNNEL_INVALID_SOCKET) {
-	if(data->signal_error_callback) {
-	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: socket: %s\n", err_str);
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
-	}
-	goto error;
+        if(data->signal_error_callback) {
+            char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+            strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: socket: %s\n", err_str);
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
+        }
+        goto error;
     }
     sin.sin_family = AF_INET;
     sin.sin_port = htons(0); /* let the OS choose the port */
     sin.sin_addr.s_addr = inet_addr("127.0.0.1");
     if(INADDR_NONE == sin.sin_addr.s_addr) {
-	if(data->signal_error_callback) {
-	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: inet_addr: %s\n", err_str);
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
-	}
+        if(data->signal_error_callback) {
+            char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+            strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: inet_addr: %s\n", err_str);
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
+        }
         goto error;
     }
     sinlen = sizeof(sin);
     if(-1 == bind(data->local_listensock, (struct sockaddr *)&sin, sinlen)) {
-	if(data->signal_error_callback) {
-	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: bind: %s\n", err_str);
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
-	}
+        if(data->signal_error_callback) {
+            char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+            strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: bind: %s\n", err_str);
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
+        }
         goto error;
     }
     if(-1 == listen(data->local_listensock, 1)) {
-	if(data->signal_error_callback) {
-	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: listen: %s\n", err_str);
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
-	}
+        if(data->signal_error_callback) {
+            char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+            strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: listen: %s\n", err_str);
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
+        }
         goto error;
     }
 
     /* get info back from OS */
     if (getsockname(data->local_listensock, (struct sockaddr *)&sin, &sinlen ) == -1){
-	if(data->signal_error_callback) {
-	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
-	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
-	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
-	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: getsockname: %s\n", err_str);
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
-	}
-	goto error;
+        if(data->signal_error_callback) {
+            char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+            strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+            char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+            snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: getsockname: %s\n", err_str);
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SOCKET, msg);
+        }
+        goto error;
     }
 
     data->local_listenport = ntohs(sin.sin_port);
 
     /* Create the conveyor thread */
     if (thrd_create(&data->thread, ssh_conveyor_loop, data) != thrd_success) {
-	if(data->signal_error_callback) {
-	    data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_THREAD, "ssh_tunnel_open: proxy thread creation failed\n");
-	}
-	goto error;
+        if(data->signal_error_callback) {
+            data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_THREAD, "ssh_tunnel_open: proxy thread creation failed\n");
+        }
+        goto error;
     }
 
     return data;
 
  error:
     if (data->session) {
-	libssh2_session_disconnect(data->session, "Error in SSH tunnel setup");
-	libssh2_session_free(data->session);
+        libssh2_session_disconnect(data->session, "Error in SSH tunnel setup");
+        libssh2_session_free(data->session);
     }
     if(data->remote_desthost)
         free(data->remote_desthost);
@@ -504,48 +504,48 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
 
 
 ssh_tunnel_t *ssh_tunnel_open_with_password( const char *ssh_host,
-					     const char *ssh_user,
-					     const char *ssh_password,
-					     const char *remote_host,
-					     int remote_port,
-					     void *client,
-					     ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
-					     ssh_tunnel_signal_error_func_t signal_error_callback) {
+                                             const char *ssh_user,
+                                             const char *ssh_password,
+                                             const char *remote_host,
+                                             int remote_port,
+                                             void *client,
+                                             ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
+                                             ssh_tunnel_signal_error_func_t signal_error_callback) {
     return ssh_tunnel_open(ssh_host,
-			   ssh_user,
-			   ssh_password,
-			   NULL,
-			   0,
-			   NULL,
-			   remote_host,
-			   remote_port,
-			   client,
-			   ssh_fingerprint_check_callback,
-			   signal_error_callback);
+                           ssh_user,
+                           ssh_password,
+                           NULL,
+                           0,
+                           NULL,
+                           remote_host,
+                           remote_port,
+                           client,
+                           ssh_fingerprint_check_callback,
+                           signal_error_callback);
 }
 
 
 ssh_tunnel_t *ssh_tunnel_open_with_privkey(const char *ssh_host,
-					   const char *ssh_user,
-					   const char *ssh_priv_key,
-					   int ssh_priv_key_len,
-					   const char *ssh_priv_key_password,
-					   const char *remote_host,
-					   int remote_port,
-					   void *client,
-					   ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
-					   ssh_tunnel_signal_error_func_t signal_error_callback) {
+                                           const char *ssh_user,
+                                           const char *ssh_priv_key,
+                                           int ssh_priv_key_len,
+                                           const char *ssh_priv_key_password,
+                                           const char *remote_host,
+                                           int remote_port,
+                                           void *client,
+                                           ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
+                                           ssh_tunnel_signal_error_func_t signal_error_callback) {
     return ssh_tunnel_open(ssh_host,
-			   ssh_user,
-			   NULL,
-			   ssh_priv_key,
-			   ssh_priv_key_len,
-			   ssh_priv_key_password,
-			   remote_host,
-			   remote_port,
-			   client,
-			   ssh_fingerprint_check_callback,
-			   signal_error_callback);
+                           ssh_user,
+                           NULL,
+                           ssh_priv_key,
+                           ssh_priv_key_len,
+                           ssh_priv_key_password,
+                           remote_host,
+                           remote_port,
+                           client,
+                           ssh_fingerprint_check_callback,
+                           signal_error_callback);
 }
 
 
@@ -559,7 +559,7 @@ int ssh_tunnel_get_port(ssh_tunnel_t *tunnel) {
 
 void ssh_tunnel_close(ssh_tunnel_t *data) {
     if(!data)
-	return;
+        return;
 
     // signal end to thread
     data->close_session = 1;

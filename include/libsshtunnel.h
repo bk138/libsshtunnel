@@ -56,8 +56,8 @@ typedef enum {
    @param error_message Human-readable error message
 */
 typedef void (*ssh_tunnel_signal_error_func_t)(void *client,
-					       ssh_tunnel_error_t error_code,
-					       const char *error_message);
+                                               ssh_tunnel_error_t error_code,
+                                               const char *error_message);
 
 /**
    Decide whether or not the SSH tunnel setup should continue
@@ -72,9 +72,9 @@ typedef void (*ssh_tunnel_signal_error_func_t)(void *client,
             0 if tunnel setup should continue
  */
 typedef int (*ssh_tunnel_fingerprint_check_func_t)(void *client,
-						   const char *fingerprint,
-						   int fingerprint_len,
-						   const char *host);
+                                                   const char *fingerprint,
+                                                   int fingerprint_len,
+                                                   const char *host);
 
 
 /**
@@ -100,13 +100,13 @@ int ssh_tunnel_init();
    @return An open SSH tunnel to \p remote_host via \p ssh_host, listening on localhost.
  */
 ssh_tunnel_t* ssh_tunnel_open_with_password(const char *ssh_host,
-					    const char *ssh_user,
-					    const char *ssh_password,
-					    const char *remote_host,
-					    int remote_port,
-					    void *client,
-					    ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
-					    ssh_tunnel_signal_error_func_t error_callback);
+                                            const char *ssh_user,
+                                            const char *ssh_password,
+                                            const char *remote_host,
+                                            int remote_port,
+                                            void *client,
+                                            ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
+                                            ssh_tunnel_signal_error_func_t error_callback);
 
 
 /**
@@ -126,15 +126,15 @@ ssh_tunnel_t* ssh_tunnel_open_with_password(const char *ssh_host,
    @return An open SSH tunnel to \p remote_host via \p ssh_host, listening on localhost.
  */
 ssh_tunnel_t* ssh_tunnel_open_with_privkey(const char *ssh_host,
-					   const char *ssh_user,
-					   const char *ssh_priv_key,
-					   int ssh_priv_key_len,
-					   const char *ssh_priv_key_password,
-					   const char *remote_host,
-					   int remote_port,
-					   void *client,
-					   ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
-					   ssh_tunnel_signal_error_func_t error_callback);
+                                           const char *ssh_user,
+                                           const char *ssh_priv_key,
+                                           int ssh_priv_key_len,
+                                           const char *ssh_priv_key_password,
+                                           const char *remote_host,
+                                           int remote_port,
+                                           void *client,
+                                           ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
+                                           ssh_tunnel_signal_error_func_t error_callback);
 
 
 /**
@@ -142,7 +142,7 @@ ssh_tunnel_t* ssh_tunnel_open_with_privkey(const char *ssh_host,
    this will return 0 and the tunnel will not accept new connections.
    @return The local port to connect to or
            @c 0 if the tunnel has already been connected or
-	   @c -1 if the tunnel is invalid.
+           @c -1 if the tunnel is invalid.
  */
 int ssh_tunnel_get_port(ssh_tunnel_t *tunnel);
 
