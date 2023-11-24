@@ -563,7 +563,6 @@ void ssh_tunnel_close(ssh_tunnel_t *data) {
 
     // signal end to thread
     data->close_session = 1;
-    libssh2_session_disconnect(data->session, "Orderly close from ssh_tunnel_close()");
 
     /* the proxy thread does the internal cleanup as it can be
        ended due to external reasons */
