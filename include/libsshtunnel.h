@@ -9,8 +9,6 @@
 #ifndef LIBSSHTUNNEL_H
 #define LIBSSHTUNNEL_H
 
-#include <stddef.h>
-
 #define LIBSSHTUNNEL_VERSION_MAJOR 0
 #define LIBSSHTUNNEL_VERSION_MINOR 1
 #define LIBSSHTUNNEL_VERSION_PATCH 0
@@ -63,7 +61,7 @@ typedef void (*ssh_tunnel_signal_error_func_t)(void *client,
  */
 typedef int (*ssh_tunnel_fingerprint_check_func_t)(void *client,
 						   const char *fingerprint,
-						   size_t fingerprint_len,
+						   int fingerprint_len,
 						   const char *host);
 
 
