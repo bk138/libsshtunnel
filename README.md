@@ -10,7 +10,8 @@ libsshtunnel is a simple SSH tunnel library to let your networking app connect t
 #include <libsshtunnel.h>
 
 // Callback that handles the SSH server's fingerprint.
-// For the example, acceps any fingerprint, but normally you would check against saved ones etc.
+// For the example, accepts any fingerprint, but normally
+// you would check against saved ones etc.
 int ssh_fingerprint_check(void *client,
                           const char *fingerprint,
                           int fingerprint_len,
