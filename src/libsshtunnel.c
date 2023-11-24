@@ -227,6 +227,9 @@ static int ssh_conveyor_loop(void *arg) {
     libssh2_session_disconnect(data->session, "Client disconnecting normally");
     libssh2_session_free(data->session);
 
+    if(data->remote_desthost)
+        free(data->remote_desthost);
+
     libsshtunnel_socket_close(data->ssh_sock);
 
     return 0;
@@ -565,8 +568,6 @@ void ssh_tunnel_close(ssh_tunnel_t *data) {
     /* the proxy thread does the internal cleanup as it can be
        ended due to external reasons */
     thrd_join(data->thread, NULL);
-    if(data->remote_desthost)
-        free(data->remote_desthost);
 
     free(data);
 }
