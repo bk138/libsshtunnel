@@ -16,6 +16,8 @@
 typedef struct _ssh_tunnel ssh_tunnel_t;
 
 typedef enum {
+    /// Memory allocation error.
+    LIBSSHTUNNEL_ERROR_MEM,
     /// Network socket operation error.
     LIBSSHTUNNEL_ERROR_SOCKET,
     /// Remote host name could not be resolved to IP address.

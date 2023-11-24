@@ -281,6 +281,17 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
 	return NULL;
 
     data = calloc(1, sizeof(ssh_tunnel_t));
+    if(!data) {
+	if(signal_error_callback) {
+	    char err_str[LIBSSHTUNNEL_STRERROR_LEN];
+	    strerror_r(errno, err_str, LIBSSHTUNNEL_STRERROR_LEN);
+	    char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
+	    snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_tunnel_open: could not allocate memory: %s\n", err_str);
+	    signal_error_callback(client, LIBSSHTUNNEL_ERROR_MEM, msg);
+	}
+	return NULL;
+    }
+
     // set the sockets to invalid so we don't close invalid sockets inadvertently
     data->local_listensock = data->ssh_sock = LIBSSHTUNNEL_INVALID_SOCKET;
 
