@@ -130,7 +130,7 @@ static int ssh_conveyor_loop(void *arg) {
         FD_SET(proxy_sock, &fds);
         tv.tv_sec = 0;
         tv.tv_usec = 100000;
-        rc = select(proxy_sock + 1, &fds, NULL, NULL, &tv);
+        rc = select((int)(proxy_sock + 1), &fds, NULL, NULL, &tv);
         if(-1 == rc) {
 	    if(data->signal_error_callback) {
 		char err_str[LIBSSHTUNNEL_STRERROR_LEN];
@@ -381,7 +381,7 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     }
 
     /* check what authentication methods are available */
-    userauthlist = libssh2_userauth_list(data->session, ssh_user, strlen(ssh_user));
+    userauthlist = libssh2_userauth_list(data->session, ssh_user, (unsigned int)strlen(ssh_user));
     if(ssh_password && strstr(userauthlist, "password")) {
         if(libssh2_userauth_password(data->session, ssh_user, ssh_password)) {
 	    if(data->signal_error_callback) {
