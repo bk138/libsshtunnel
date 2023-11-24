@@ -61,10 +61,10 @@ typedef void (*ssh_tunnel_signal_error_func_t)(void *client,
    @return -1 if tunnel setup should be aborted
             0 if tunnel setup should continue
  */
-typedef int (*ssh_tunnel_fingerprint_check_func_t)(const char *fingerprint,
+typedef int (*ssh_tunnel_fingerprint_check_func_t)(void *client,
+						   const char *fingerprint,
 						   size_t fingerprint_len,
-						   const char *host,
-						   void *client);
+						   const char *host);
 
 
 /**
