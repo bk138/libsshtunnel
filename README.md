@@ -36,7 +36,7 @@ int main () {
         // Initial tunnel creation succeeded; you can now let your code connect
         // to the local end of the tunnel:
         // Your client will get connected to the server running on
-        / "ssh.server.net", port 26000, as specified above.
+        // "ssh.server.net", port 26000, as specified above.
         my_client_connect("localhost", ssh_tunnel_get_port(t));
 
        // Your other logic here...
