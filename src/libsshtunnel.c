@@ -80,7 +80,7 @@ static int ssh_conveyor_loop(void *arg) {
     ssh_tunnel_t *data = arg;
     int rc;
     struct sockaddr_in sin;
-    socklen_t sinlen;
+    socklen_t sinlen = sizeof(sin);
     LIBSSH2_CHANNEL *channel = NULL;
     const char *shost;
     int sport;
