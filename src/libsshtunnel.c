@@ -572,6 +572,9 @@ void ssh_tunnel_close(ssh_tunnel_t *data) {
     // signal end to thread
     data->close_session = 1;
 
+    // close the listener socket in case the thread is blocking on accept()
+    libsshtunnel_socket_close(data->local_listensock);
+
     /* the proxy thread does the internal cleanup as it can be
        ended due to external reasons */
     thrd_join(data->thread, NULL);
