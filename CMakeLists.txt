@@ -81,6 +81,17 @@ target_link_libraries(sshtunnel PRIVATE ${LIBSSH2_LIBRARY} ${WS_LIBRARY} ${CMAKE
 
 
 #
+# Test config
+#
+enable_testing()
+add_executable(test-close-of-unused-tunnel
+  test/close-of-unused-tunnel.c
+)
+target_link_libraries(test-close-of-unused-tunnel sshtunnel)
+add_test(NAME close-of-unused-tunnel COMMAND test-close-of-unused-tunnel)
+
+
+#
 # Install
 #
 # Install built targets
