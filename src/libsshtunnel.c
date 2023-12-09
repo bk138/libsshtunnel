@@ -66,6 +66,7 @@ struct _ssh_tunnel {
     void *client;
     LIBSSH2_SESSION *session;
     int close_session;
+    LIBSSH2_CHANNEL *channel;
     thrd_t thread;
     libssh2_socket_t ssh_sock;
     libssh2_socket_t local_listensock;
@@ -81,7 +82,6 @@ static int ssh_conveyor_loop(void *arg) {
     int rc;
     struct sockaddr_in sin;
     socklen_t sinlen = sizeof(sin);
-    LIBSSH2_CHANNEL *channel = NULL;
     const char *shost;
     int sport;
     fd_set fds;
@@ -109,18 +109,6 @@ static int ssh_conveyor_loop(void *arg) {
     shost = inet_ntoa(sin.sin_addr);
     sport = ntohs(sin.sin_port);
 
-    channel = libssh2_channel_direct_tcpip_ex(data->session, data->remote_desthost,
-        data->remote_destport, shost, sport);
-    if(!channel) {
-        if(data->signal_error_callback) {
-            data->signal_error_callback(data->client,
-                                        LIBSSHTUNNEL_ERROR_DIRECT_TCP_IP,
-                                        "ssh_conveyor_loop: Could not open the direct-tcpip channel!\n"
-                                        "(Note that this can be a problem at the server!"
-                                        " Please review the server logs.)\n");
-        }
-        goto shutdown;
-    }
 
     /* Must use non-blocking IO hereafter due to the current libssh2 API */
     libssh2_session_set_blocking(data->session, 0);
@@ -163,7 +151,7 @@ static int ssh_conveyor_loop(void *arg) {
             }
             wr = 0;
             while(wr < len) {
-                ssize_t nwritten = libssh2_channel_write(channel, buf + wr, len - wr);
+                ssize_t nwritten = libssh2_channel_write(data->channel, buf + wr, len - wr);
                 if(LIBSSH2_ERROR_EAGAIN == nwritten) {
                     continue;
                 }
@@ -179,7 +167,7 @@ static int ssh_conveyor_loop(void *arg) {
             }
         }
         while(1) {
-            len = libssh2_channel_read(channel, buf, sizeof(buf));
+            len = libssh2_channel_read(data->channel, buf, sizeof(buf));
             if(LIBSSH2_ERROR_EAGAIN == len || data->close_session)
                 break;
             else if(len < 0) {
@@ -205,7 +193,7 @@ static int ssh_conveyor_loop(void *arg) {
                 }
                 wr += nsent;
             }
-            if(libssh2_channel_eof(channel)) {
+            if(libssh2_channel_eof(data->channel)) {
                 if(data->signal_error_callback) {
                         char msg[LIBSSHTUNNEL_ERROR_MSG_LEN];
                         snprintf(msg, LIBSSHTUNNEL_ERROR_MSG_LEN, "ssh_conveyor_loop: the server at %s:%d disconnected!\n",
@@ -221,8 +209,8 @@ static int ssh_conveyor_loop(void *arg) {
 
     libsshtunnel_socket_close(proxy_sock);
 
-    if(channel)
-        libssh2_channel_free(channel);
+    if(data->channel)
+        libssh2_channel_free(data->channel);
 
     libssh2_session_disconnect(data->session, "Client disconnecting normally");
     libssh2_session_free(data->session);
@@ -415,6 +403,23 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
         goto error;
     }
 
+
+    /*
+       Connect from the SSH server to the actual host.
+     */
+    data->channel = libssh2_channel_direct_tcpip(data->session, data->remote_desthost, data->remote_destport);
+    if(!data->channel) {
+        if(data->signal_error_callback) {
+            data->signal_error_callback(data->client,
+                                        LIBSSHTUNNEL_ERROR_DIRECT_TCP_IP,
+                                        "ssh_conveyor_loop: Could not open the direct-tcpip channel!\n"
+                                        "(Note that this can be a problem at the server!"
+                                        " Please review the server logs.)\n");
+        }
+        goto error;
+    }
+
+
     /* Create and bind the local listening socket */
     data->local_listensock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(data->local_listensock == LIBSSHTUNNEL_INVALID_SOCKET) {
@@ -487,6 +492,9 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
     return data;
 
  error:
+    if(data->channel) {
+        libssh2_channel_free(data->channel);
+    }
     if (data->session) {
         libssh2_session_disconnect(data->session, "Error in SSH tunnel setup");
         libssh2_session_free(data->session);
