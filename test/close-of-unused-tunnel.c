@@ -18,6 +18,7 @@ int main() {
     assert(ssh_tunnel_init() == 0);
 
     ssh_tunnel_t *t = ssh_tunnel_open_with_password(getenv("LIBSSHTUNNEL_TEST_SSH_HOST"),
+                                                    atoi(getenv("LIBSSHTUNNEL_TEST_SSH_PORT")),
                                                     getenv("LIBSSHTUNNEL_TEST_SSH_USER"),
                                                     getenv("LIBSSHTUNNEL_TEST_SSH_PASSWORD"),
                                                     getenv("LIBSSHTUNNEL_TEST_REMOTE_HOST"),

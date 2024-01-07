@@ -90,6 +90,7 @@ int ssh_tunnel_init();
    Once established, the tunnel entry will listen on localhost on the port
    indicated by \ref ssh_tunnel_get_port().
    @param ssh_host The SSH server host to connect to.
+   @param ssh_port The SSH server host's port to connect to.
    @param ssh_user The SSH user to authenticate as.
    @param ssh_password The SSH user password to authenticate with.
    @param remote_host The remote host to connect to from the SSH server.
@@ -100,6 +101,7 @@ int ssh_tunnel_init();
    @return An open SSH tunnel to \p remote_host via \p ssh_host, listening on localhost.
  */
 ssh_tunnel_t* ssh_tunnel_open_with_password(const char *ssh_host,
+                                            int ssh_port,
                                             const char *ssh_user,
                                             const char *ssh_password,
                                             const char *remote_host,
@@ -114,6 +116,7 @@ ssh_tunnel_t* ssh_tunnel_open_with_password(const char *ssh_host,
    Once established, the tunnel entry will listen on localhost on the port
    indicated by \ref ssh_tunnel_get_port().
    @param ssh_host The SSH server host to connect to.
+   @param ssh_port The SSH server host's port to connect to.
    @param ssh_user The SSH user to authenticate as.
    @param ssh_priv_key The SSH private key to authenticate with.
    @param ssh_priv_key_len The length in bytes of SSH private key to authenticate with.
@@ -126,6 +129,7 @@ ssh_tunnel_t* ssh_tunnel_open_with_password(const char *ssh_host,
    @return An open SSH tunnel to \p remote_host via \p ssh_host, listening on localhost.
  */
 ssh_tunnel_t* ssh_tunnel_open_with_privkey(const char *ssh_host,
+                                           int ssh_port,
                                            const char *ssh_user,
                                            const char *ssh_priv_key,
                                            int ssh_priv_key_len,

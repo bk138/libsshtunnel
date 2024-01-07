@@ -249,6 +249,7 @@ void ssh_tunnel_exit() {
 
 
 static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
+                                     int ssh_port,
                                      const char *ssh_user,
                                      const char *ssh_password,
                                      const char *ssh_priv_key,
@@ -321,7 +322,7 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
         goto error;
     }
 
-    sin.sin_port = htons(22);
+    sin.sin_port = htons(ssh_port);
     if(connect(data->ssh_sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) != 0) {
         if(data->signal_error_callback) {
             data->signal_error_callback(data->client, LIBSSHTUNNEL_ERROR_SSH_CONNECT, "ssh_tunnel_open: failed to connect to SSH server!\n");
@@ -512,6 +513,7 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
 
 
 ssh_tunnel_t *ssh_tunnel_open_with_password( const char *ssh_host,
+                                             int ssh_port,
                                              const char *ssh_user,
                                              const char *ssh_password,
                                              const char *remote_host,
@@ -520,6 +522,7 @@ ssh_tunnel_t *ssh_tunnel_open_with_password( const char *ssh_host,
                                              ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
                                              ssh_tunnel_signal_error_func_t signal_error_callback) {
     return ssh_tunnel_open(ssh_host,
+                           ssh_port,
                            ssh_user,
                            ssh_password,
                            NULL,
@@ -534,6 +537,7 @@ ssh_tunnel_t *ssh_tunnel_open_with_password( const char *ssh_host,
 
 
 ssh_tunnel_t *ssh_tunnel_open_with_privkey(const char *ssh_host,
+                                           int ssh_port,
                                            const char *ssh_user,
                                            const char *ssh_priv_key,
                                            int ssh_priv_key_len,
@@ -544,6 +548,7 @@ ssh_tunnel_t *ssh_tunnel_open_with_privkey(const char *ssh_host,
                                            ssh_tunnel_fingerprint_check_func_t ssh_fingerprint_check_callback,
                                            ssh_tunnel_signal_error_func_t signal_error_callback) {
     return ssh_tunnel_open(ssh_host,
+                           ssh_port,
                            ssh_user,
                            NULL,
                            ssh_priv_key,
