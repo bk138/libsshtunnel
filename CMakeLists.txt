@@ -8,6 +8,8 @@ cmake_minimum_required(VERSION 3.10)
 project(libsshtunnel VERSION 0.3.0 LANGUAGES C)
 include(CheckIncludeFile)
 
+option(LIBSSHTUNNEL_INSTALL "Generate installation target" ON)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(CMAKE_GENERATOR MATCHES "Unix Makefiles|Ninja")
@@ -95,11 +97,13 @@ add_test(NAME close-of-unused-tunnel COMMAND test-close-of-unused-tunnel)
 # Install
 #
 # Install built targets
-install(TARGETS sshtunnel
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-)
+if(LIBSSHTUNNEL_INSTALL)
+  install(TARGETS sshtunnel
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+  )
 
-# Install headers
-install(FILES ${HEADER_FILES} DESTINATION include)
+  # Install headers
+  install(FILES ${HEADER_FILES} DESTINATION include)
+endif()
