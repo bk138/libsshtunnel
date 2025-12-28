@@ -9,6 +9,10 @@
 #ifndef LIBSSHTUNNEL_H
 #define LIBSSHTUNNEL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define LIBSSHTUNNEL_VERSION_MAJOR 0
 #define LIBSSHTUNNEL_VERSION_MINOR 3
 #define LIBSSHTUNNEL_VERSION_PATCH 0
@@ -162,5 +166,8 @@ void ssh_tunnel_close(ssh_tunnel_t *tunnel);
  */
 void ssh_tunnel_exit();
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
