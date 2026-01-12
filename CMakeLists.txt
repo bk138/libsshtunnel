@@ -25,7 +25,7 @@ endif(CMAKE_GENERATOR MATCHES "Unix Makefiles|Ninja")
 #
 # Dependencies
 #
-find_package(LibSSH2 REQUIRED)
+find_package(Libssh2 REQUIRED)
 check_include_file("threads.h" HAVE_THREADS_H)
 if(HAVE_THREADS_H)
   message(STATUS "Multithreading using C11 threads")
@@ -77,9 +77,9 @@ if(WIN32)
     set(WS_LIBRARY ws2_32)
 endif(WIN32)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${LIBSSH2_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${Libssh2_INCLUDE_DIR})
 add_library(sshtunnel ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(sshtunnel PRIVATE ${LIBSSH2_LIBRARY} ${WS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(sshtunnel PRIVATE ${Libssh2_LIBRARIES} ${WS_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 
 
 #
