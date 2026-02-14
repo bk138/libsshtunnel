@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 cmake_minimum_required(VERSION 3.10)
-project(libsshtunnel VERSION 0.4.0 LANGUAGES C)
+project(libsshtunnel VERSION 0.5.0 LANGUAGES C)
 include(CheckIncludeFile)
 
 option(LIBSSHTUNNEL_INSTALL "Generate installation target" ON)
