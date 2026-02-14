@@ -72,13 +72,15 @@ typedef void (*ssh_tunnel_signal_error_func_t)(void *client,
    @param fingerprint SHA256 fingerprint of \p host
    @param fingerprint_len Length in bytes of \p fingerprint
    @param host The SSH server whose fingerprint is presented.
+   @param port The port of the SSH server whose fingerprint is presented.
    @return -1 if tunnel setup should be aborted
             0 if tunnel setup should continue
  */
 typedef int (*ssh_tunnel_fingerprint_check_func_t)(void *client,
                                                    const char *fingerprint,
                                                    int fingerprint_len,
-                                                   const char *host);
+                                                   const char *host,
+                                                   int port);
 
 
 /**

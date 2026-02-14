@@ -360,7 +360,7 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
      * user, that's your call
      */
     fingerprint = libssh2_hostkey_hash(data->session, LIBSSH2_HOSTKEY_HASH_SHA256);
-    if(ssh_fingerprint_check_callback(data->client, fingerprint, 32, ssh_host) == -1) {
+    if(ssh_fingerprint_check_callback(data->client, fingerprint, 32, ssh_host, ssh_port) == -1) {
         if(data->signal_error_callback) {
             data->signal_error_callback(data->client,
                                         LIBSSHTUNNEL_ERROR_SSH_FINGERPRINT_CHECK,

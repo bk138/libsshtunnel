@@ -9,7 +9,8 @@
 int ssh_fingerprint_check(void* client,
 			  const char *fingerprint,
 			  int fingerprint_len,
-                          const char *host) {
+                          const char *host,
+                          int port) {
     return 0;
 }
 
