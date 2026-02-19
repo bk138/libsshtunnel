@@ -126,7 +126,7 @@ ssh_tunnel_t* ssh_tunnel_open_with_password(const char *ssh_host,
    @param ssh_user The SSH user to authenticate as.
    @param ssh_priv_key The SSH private key to authenticate with.
    @param ssh_priv_key_len The length in bytes of SSH private key to authenticate with.
-   @param ssh_priv_key_password The SSH private key password to authenticate with.
+   @param ssh_priv_key_password The password of the given SSH private key. Can be NULL or empty string if the key is not password-protected.
    @param remote_host The remote host to connect to from the SSH server.
    @param remote_port The port of the remote host to connect to from the SSH server.
    @param client Application pointer that's given to the SSH fingerprint check and log callbacks.

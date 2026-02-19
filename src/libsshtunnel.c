@@ -381,7 +381,7 @@ static ssh_tunnel_t* ssh_tunnel_open(const char *ssh_host,
             goto error;
         }
     }
-    else if(ssh_priv_key && ssh_priv_key_password && strstr(userauthlist, "publickey")) {
+    else if(ssh_priv_key && strstr(userauthlist, "publickey")) {
         if(libssh2_userauth_publickey_frommemory(data->session,
                                                  ssh_user, strlen(ssh_user),
                                                  NULL, 0,
